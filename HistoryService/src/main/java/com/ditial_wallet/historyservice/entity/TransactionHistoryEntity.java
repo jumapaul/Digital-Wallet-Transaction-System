@@ -10,6 +10,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity(name = "transactions_history")
+@Table(
+        indexes = {
+                @Index(
+                        name = "idx_transaction_history_transactionId",
+                        columnList = "transactionId")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +29,7 @@ public class TransactionHistoryEntity {
     private Long userId;
     private BigDecimal amount;
     private String eventType;
+    @Column(unique = true)
     private Long transactionId;
     private LocalDateTime createdAt;
 }

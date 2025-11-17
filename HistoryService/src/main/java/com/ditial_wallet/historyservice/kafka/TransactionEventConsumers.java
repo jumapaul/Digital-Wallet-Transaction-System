@@ -1,13 +1,12 @@
 package com.ditial_wallet.historyservice.kafka;
 
-//import com.digital_wallet.avroschema.avro.TransactionAvcEvent;
-
 import com.digital_wallet.avroschema.avro.TransactionAvcEvent;
 import com.ditial_wallet.historyservice.entity.TransactionHistoryEntity;
 import com.ditial_wallet.historyservice.repository.HistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -27,16 +26,17 @@ public class TransactionEventConsumers {
 
     @KafkaListener(topics = FundWalletTopic, groupId = FundWalletConsumerGroup)
     public void listenToFundingEvents(ConsumerRecord<String, TransactionAvcEvent> consumerRecord) {
-        String key = consumerRecord.key();
-        TransactionAvcEvent event = consumerRecord.value();
+        try {
+            TransactionAvcEvent event = consumerRecord.value();
 
-        log.info("---------------->key: {}, fund event: {}", key, consumerRecord.value());
-        saveToDb(event);
+            saveToDb(event);
+        } catch (DuplicateKeyException e) {
+            log.info("--------------> event {} has been duplicated", consumerRecord.value());
+        }
     }
 
     @KafkaListener(topics = TransferWalletTopic, groupId = TransferWalletConsumerGroup)
     public void listen(TransactionAvcEvent event) {
-        log.info("---------------->transfer event: {}", event);
         saveToDb(event);
     }
 

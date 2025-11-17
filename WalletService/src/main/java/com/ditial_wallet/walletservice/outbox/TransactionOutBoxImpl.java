@@ -5,12 +5,14 @@ import com.ditial_wallet.walletservice.kafka.KafkaProducer;
 import com.ditial_wallet.walletservice.kafka.TransactionEventWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -22,28 +24,29 @@ public class TransactionOutBoxImpl {
 
     @Scheduled(fixedRate = 10000)
     public void pullAndPublishToKafka() {
-        try {
-            List<TransactionOutBoxEntity> unprocessedRequests = outBoxRepository.findAllByProcessedFalse();
+        List<TransactionOutBoxEntity> unprocessedRequests = outBoxRepository.findAllByProcessedFalse();
 
-            unprocessedRequests.forEach(transactionOutBoxEntity -> {
-                publishEvent(transactionOutBoxEntity, transactionOutBoxEntity.getTopic());
-
-                transactionOutBoxEntity.setProcessed(true);
-                outBoxRepository.save(transactionOutBoxEntity);
+        unprocessedRequests.forEach(transactionOutBoxEntity -> {
+            publishEvent(transactionOutBoxEntity, transactionOutBoxEntity.getTopic()).whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.info("Kafka ack received for event {}", transactionOutBoxEntity);
+                    transactionOutBoxEntity.setProcessed(true);
+                    outBoxRepository.save(transactionOutBoxEntity);
+                } else {
+                    log.error("Kafka send failed for event {}", transactionOutBoxEntity);
+                }
             });
 
-
-        } catch (RuntimeException exception) {
-            log.error("------------> {}", exception.getMessage());
-        }
+            transactionOutBoxEntity.setProcessed(true);
+            outBoxRepository.save(transactionOutBoxEntity);
+        });
 
     }
 
-    private void publishEvent(
+    private CompletableFuture<SendResult<String, TransactionAvcEvent>> publishEvent(
             TransactionOutBoxEntity transaction,
             String topic
     ) {
-        log.info("---------------->published: {}", transaction);
         TransactionAvcEvent event = new TransactionAvcEvent(
                 transaction.getTransactionType().name(),
                 transaction.getStatus().name(),
@@ -54,6 +57,6 @@ public class TransactionOutBoxImpl {
                 transaction.getTimestamp().toInstant(ZoneOffset.UTC).toEpochMilli()
         );
 
-        producer.publishMessage(new TransactionEventWrapper(event, transaction.getTransactionType(), topic));
+        return producer.publishMessage(new TransactionEventWrapper(event, transaction.getTransactionType(), topic));
     }
 }

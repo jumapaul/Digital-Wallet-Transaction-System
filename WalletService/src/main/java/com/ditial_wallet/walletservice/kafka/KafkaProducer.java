@@ -1,6 +1,7 @@
 package com.ditial_wallet.walletservice.kafka;
 
 import com.digital_wallet.avroschema.avro.TransactionAvcEvent;
+import com.google.common.util.concurrent.ListenableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -17,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaProducer {
     private final KafkaTemplate<String, TransactionAvcEvent> kafkaTemplate;
 
-    public void publishMessage(TransactionEventWrapper avcEvent) {
-        kafkaTemplate.send(avcEvent.getTopic(), avcEvent.getEvent());
+    public CompletableFuture<SendResult<String, TransactionAvcEvent>> publishMessage(TransactionEventWrapper avcEvent) {
+        return kafkaTemplate.send(avcEvent.getTopic(), avcEvent.getEvent());
     }
 }
