@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: history-service
+  datasource:
+    password: postgres
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/wallet
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      properties:
+        schema:
+          registry:
+            url: "http://127.0.0.1:8081"
+
+server:
+  port: 8020
