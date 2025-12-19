@@ -1,0 +1,2 @@
+rootProject.name = 'HistoryService'
+includeBuild('../AvroSchema')
