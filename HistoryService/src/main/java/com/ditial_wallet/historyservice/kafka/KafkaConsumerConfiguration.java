@@ -14,8 +14,11 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Kafka consumers
+ */
 @Configuration
-public class KafkaConfiguration {
+public class KafkaConsumerConfiguration {
 
     @Value("${spring.kafka.consumer.bootstrap-servers}")
     private String bootstrapServer;

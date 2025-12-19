@@ -22,12 +22,16 @@ public class TransactionOutBoxImpl {
     private final KafkaProducer producer;
     private final TransactionOutBoxRepository outBoxRepository;
 
+    /*
+    Scheduler that consume events from outbox table and publish to kafka.
+     */
     @Scheduled(fixedRate = 10000)
     public void pullAndPublishToKafka() {
         List<TransactionOutBoxEntity> unprocessedRequests = outBoxRepository.findAllByProcessedFalse();
 
         unprocessedRequests.forEach(transactionOutBoxEntity -> {
             publishEvent(transactionOutBoxEntity, transactionOutBoxEntity.getTopic()).whenComplete((result, ex) -> {
+                //if we receive acknowledgement and no error then set processed state to true.
                 if (ex == null) {
                     log.info("Kafka ack received for event {}", transactionOutBoxEntity);
                     transactionOutBoxEntity.setProcessed(true);
@@ -36,9 +40,6 @@ public class TransactionOutBoxImpl {
                     log.error("Kafka send failed for event {}", transactionOutBoxEntity);
                 }
             });
-
-            transactionOutBoxEntity.setProcessed(true);
-            outBoxRepository.save(transactionOutBoxEntity);
         });
 
     }

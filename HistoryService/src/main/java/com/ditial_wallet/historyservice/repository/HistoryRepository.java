@@ -11,4 +11,6 @@ public interface HistoryRepository extends JpaRepository<TransactionHistoryEntit
     List<TransactionHistoryEntity> findAllByWalletId(Long walletId);
 
     List<TransactionHistoryEntity> findAllByUserId(Long userId);
+
+    Optional<TransactionHistoryEntity> findByTransactionId(Long transactionId);
 }

@@ -5,6 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
+/**
+ * Kafka topics to publish our events
+ * All fund wallet transactions are published on fund wallet event.
+ * All wallet transfers are published on transfer wallet event.
+ */
+
 @Configuration
 public class EventTopic {
 

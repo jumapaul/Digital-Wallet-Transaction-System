@@ -11,6 +11,7 @@ import com.ditial_wallet.walletservice.outbox.TransactionOutBoxEntity;
 import com.ditial_wallet.walletservice.repository.TransactionRepository;
 import com.ditial_wallet.walletservice.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
@@ -34,6 +36,9 @@ public class WalletServiceImpl implements WalletService {
 
         return walletRepository.save(mappers.toWallet(request));
     }
+
+
+    //Save the transactions to transaction db as well as outbox db
 
     @Transactional
     @Override
@@ -54,11 +59,12 @@ public class WalletServiceImpl implements WalletService {
 
             return wallet;
         } catch (RuntimeException exception) {
+            //We are saving even failed funding to wallet
             TransactionEntity transactionEntity = saveTransaction(transactionRequest, wallet, TransactionStatus.FAILED, TransactionType.FUND);
 
             saveToTransactionOutBox(wallet, transactionEntity, FundWalletTopic);
-
-            throw new RuntimeException(exception.getMessage());
+            log.error(exception.getMessage());
+            throw new BadRequestException(exception.getMessage());
         }
     }
 
@@ -90,22 +96,27 @@ public class WalletServiceImpl implements WalletService {
             receiverWallet.setUpdatedAt(LocalDateTime.now());
 
 
+            //save debit transaction to db
             TransactionEntity debitTransaction = saveTransaction(transactionRequest, senderWallet,
                     TransactionStatus.COMPLETED, TransactionType.TRANSFER_OUT);
 
+            //save debit transaction to outbox db
             saveToTransactionOutBox(senderWallet, debitTransaction, TransferWalletTopic);
 
+            //save credit transaction to transaction db
             TransactionEntity creditTransaction = saveTransaction(transactionRequest, receiverWallet,
                     TransactionStatus.COMPLETED, TransactionType.TRANSFER_IN);
 
+            //Save credit transaction to outbox db
             saveToTransactionOutBox(receiverWallet, creditTransaction, TransferWalletTopic);
 
             return senderWallet;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             saveTransaction(transactionRequest, receiverWallet,
                     TransactionStatus.FAILED, TransactionType.TRANSFER_OUT);
 
-            throw new RuntimeException(e.getMessage());
+            log.error(e.getMessage());
+            throw new BadRequestException(e.getMessage());
         }
     }
 

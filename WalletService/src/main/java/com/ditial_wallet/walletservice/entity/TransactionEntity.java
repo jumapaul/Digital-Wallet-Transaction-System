@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction table to store all transactions
+ */
 @Entity(name = "transaction")
 @Builder
 @Data

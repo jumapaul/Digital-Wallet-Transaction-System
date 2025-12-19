@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction history table with transactionId indexed to reduce latency during retrieval
+ */
+
 @Entity(name = "transactions_history")
 @Table(
         indexes = {

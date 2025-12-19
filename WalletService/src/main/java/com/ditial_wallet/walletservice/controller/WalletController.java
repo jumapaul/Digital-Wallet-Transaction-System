@@ -3,7 +3,6 @@ package com.ditial_wallet.walletservice.controller;
 import com.ditial_wallet.walletservice.dtos.CreateWalletRequest;
 import com.ditial_wallet.walletservice.dtos.TransactionRequest;
 import com.ditial_wallet.walletservice.entity.Wallet;
-import com.ditial_wallet.walletservice.service.OptimisticTransactionTest;
 import com.ditial_wallet.walletservice.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,6 @@ import java.util.List;
 public class WalletController {
 
     private final WalletService walletService;
-    private final OptimisticTransactionTest optimisticTransactionTest;
 
     @PostMapping("wallet")
     public ResponseEntity<Wallet> createWallet(@RequestBody CreateWalletRequest request) {

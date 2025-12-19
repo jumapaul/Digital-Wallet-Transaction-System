@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Mapper class to map entities and responses
+ */
+
 @Service
 public class WalletMappers {
 

@@ -1,7 +1,8 @@
 package com.ditial_wallet.walletservice.dtos;
 
-import java.util.UUID;
-
+/**
+ * Request body for creating wallet.
+ */
 public record CreateWalletRequest(
         Long userId
 ) {

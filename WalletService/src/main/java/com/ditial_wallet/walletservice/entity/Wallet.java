@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Wallet table for list of all wallets
+ */
+
 @Entity(name = "Wallet")
 @Data
 @AllArgsConstructor
@@ -20,7 +24,7 @@ public class Wallet {
     private Long id;
     private Long userId;
     private BigDecimal balance;
-    @Version
+    @Version //for optimistic locking
     private Long version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

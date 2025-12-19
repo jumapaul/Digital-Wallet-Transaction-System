@@ -11,6 +11,10 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Outbox table.
+ * We use it to store transaction event before publishing to kafka to avoid data loss.
+ */
 @Entity(name = "TransactionOutbox")
 @Builder
 @NoArgsConstructor

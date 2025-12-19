@@ -6,6 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * Global exception handler
+ */
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -23,5 +27,13 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 null
         ), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    ResponseEntity<Object> handleBadRequestException(BadRequestException exception) {
+        return new ResponseEntity<>(new ApiResponse<>(
+                exception.getMessage(),
+                null
+        ), HttpStatus.BAD_REQUEST);
     }
 }
